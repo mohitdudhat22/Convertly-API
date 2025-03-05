@@ -3,14 +3,16 @@ import io
 import subprocess
 import fitz
 import zipfile
+import uvicorn
 from docx import Document
 from PIL import Image
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 app = FastAPI()
-
+load_dotenv()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # In production, replace with your frontend URL
@@ -141,3 +143,8 @@ async def convert_pdf_to_word(file: UploadFile = File(...)):
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         headers={"Content-Disposition": "attachment; filename=converted.docx"}
     )
+
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))  # Default to 8000 if PORT is not set
+    uvicorn.run(app, host="0.0.0.0", port=port)
