@@ -8,8 +8,16 @@ from PIL import Image
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # Define output folder
 OUTPUT_FOLDER = "Compressed"
 
@@ -34,34 +42,23 @@ async def compress_pdf(
     file: UploadFile = File(...),
     compression_mode: str = Form(...)
 ):
-    print(f"Received compression mode: {compression_mode}")
-    print(f"Received file: {file.filename}")
-
     if compression_mode not in COMPRESSION_LEVELS:
         return {"error": "Invalid compression mode! Choose from: low, medium, high"}
 
-    input_path = file.filename
+    input_path = f"/app/{file.filename}"
     output_path = os.path.join(OUTPUT_FOLDER, file.filename)
 
     with open(input_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    # subprocess.call([
-    #     "gs", "-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.4",
-    #     f"-dPDFSETTINGS={COMPRESSION_LEVELS[compression_mode]}",
-    #     "-dNOPAUSE", "-dQUIET", "-dBATCH",
-    #     f"-sOutputFile={output_path}", input_path
-    # ])
-
     subprocess.call([
-        "C:\\Program Files\\gs\\gs10.04.0\\bin\\gswin64c.exe", "-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.4",
+        "gs", "-sDEVICE=pdfwrite", "-dCompatibilityLevel=1.4",
         f"-dPDFSETTINGS={COMPRESSION_LEVELS[compression_mode]}",
         "-dNOPAUSE", "-dQUIET", "-dBATCH",
         f"-sOutputFile={output_path}", input_path
     ])
 
     return FileResponse(output_path, filename=file.filename, media_type="application/pdf")
-
 
 
 @app.post("/protect/")
