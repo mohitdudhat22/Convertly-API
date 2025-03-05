@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.13
 
 # Install Ghostscript and other required system dependencies
 RUN apt-get update && apt-get install -y ghostscript && rm -rf /var/lib/apt/lists/*
