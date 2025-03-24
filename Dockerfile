@@ -18,4 +18,4 @@ ENV PORT=8000
 # Expose the port
 EXPOSE $PORT
 # Run the FastAPI application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "$PORT"]
